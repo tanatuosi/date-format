@@ -18,68 +18,43 @@ export function formate(
   formatter: string | ((dateInfo: DateInfo) => string),
   isPad = false
 ): string {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hour = date.getHours();
-  const minute = date.getMinutes();
-  const second = date.getSeconds();
-  const yyyy = String(year);
-  const MM = String(month);
-  const dd = String(day);
-  const hh = String(hour);
-  const mm = String(minute);
-  const ss = String(second);
-  const padMonth = month < 10 ? `0${month}` : MM;
-  const padDay = day < 10 ? `0${day}` : dd;
-  const padHour = hour < 10 ? `0${hour}` : hh;
-  const padMinute = minute < 10 ? `0${minute}` : mm;
-  const padSecond = second < 10 ? `0${second}` : ss;
+  const dataInfo: DateInfo = {
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+    second: date.getSeconds(),
+    yyyy: String( date.getFullYear()),
+    MM:  String(date.getMonth() + 1),
+    dd: String(date.getDate()),
+    hh: String(date.getHours()),
+    mm: String(date.getMinutes()),
+    ss: String(date.getSeconds()),
+  };
   if (typeof formatter === "string") {
-    if (isPad) {
-      if (formatter === "date") {
-        return `${year}-${padMonth}-${day}`;
-      }
-      if (formatter === "datetime") {
-        return `${year}-${padMonth}-${padDay} ${padHour}:${padMinute}:${padSecond}`;
-      }
-      const timeOut = formatter
-        .replaceAll("yyyy", yyyy)
-        .replaceAll("MM", padMonth)
-        .replaceAll("hh", padHour)
-        .replaceAll("mm", padMinute)
-        .replaceAll("ss", padSecond)
-        .replaceAll("dd", padDay);
-      return timeOut;
+    let timeString = formatter;
+    const getPadTime = (value: string) =>
+    isPad ? value.padStart(2, "0") : value;
+    if (formatter === "date") {
+      timeString = "yyyy-MM-dd"
     }
-    if (formatter === "date") return `${year}-${month}-${day}`;
     if (formatter === "datetime") {
-      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+      timeString = "yyyy-MM-dd hh:mm:ss"
     }
-    const timeOut = formatter
-      .replaceAll("yyyy", yyyy)
-      .replaceAll("MM", MM)
-      .replaceAll("hh", hh)
-      .replaceAll("mm", mm)
-      .replaceAll("ss", ss)
-      .replaceAll("dd", dd);
-    return timeOut;
+    const replacements: Record<string, string | number> = {
+      yyyy: dataInfo.year,
+      MM: getPadTime(dataInfo.MM),
+      dd: getPadTime(dataInfo.dd),
+      hh: getPadTime(dataInfo.hh),
+      mm: getPadTime(dataInfo.mm),
+      ss: getPadTime(dataInfo.ss)
+    };
+
+    return timeString.replace(/yyyy|MM|dd|hh|mm|ss/g, (matched) => replacements[matched].toString());
   }
   if (typeof formatter === "function") {
-    return formatter({
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      yyyy,
-      MM,
-      dd,
-      hh,
-      mm,
-      ss,
-    });
+    return formatter(dataInfo);
   }
   return "";
 }
